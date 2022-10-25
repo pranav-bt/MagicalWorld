@@ -6,16 +6,19 @@
 #include "GameFramework/Character.h"
 #include "MagicSpell.h"
 #include "BaseEnemyCharacter.h"
-#include "EnemyCharacter.generated.h"
+#include "Particles/ParticleSystemComponent.h"
+#include "Particles/ParticleSystem.h"
+#include "Materials/Material.h"
+#include "SphereEnemyCharacter.generated.h"
 
 UCLASS()
-class MAGICALWORLD_API AEnemyCharacter : public ABaseEnemyCharacter
+class MAGICALWORLD_API ASphereEnemyCharacter : public ABaseEnemyCharacter
 {
 	GENERATED_BODY()
 
 public:
 	// Sets default values for this character's properties
-	AEnemyCharacter();
+	ASphereEnemyCharacter();
 
 protected:
 	// Called when the game starts or when spawned
@@ -38,22 +41,26 @@ public:
 
 	int32 Health = 100;
 
-	class ACubeAIController* AIController;
-
-	UPROPERTY(BlueprintReadWrite)
-	float AttackRange = 500.0f;
-
-	UPROPERTY(BlueprintReadWrite)
-	float HealthToTeleport = 50.0f;
+	class ASphereAIController* AIController;
 
 	void ChangeStateConditions();
 
-	UPROPERTY(EditInstanceOnly)
-	TArray<class AActor*> PatrolPoints;
-
-	UPROPERTY(EditInstanceOnly)
-	TArray<class AActor*> TeleportPoints;
-
-	UPROPERTY(EditAnywhere, Category="Attack")
+	UPROPERTY(EditAnywhere, Category = "Attack")
 	TSubclassOf<AMagicSpell> EnemySpell;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
+	UMaterial* AttackMaterial;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
+	UMaterial* RegularMaterial;
+
+	UPROPERTY(EditAnywhere, category = "Attack")
+	UParticleSystem* SpellEffectt;
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void ChangeToAttackMaterial(float Duration);
+
+	float Cooldown = 3.0f;
+
+	bool bBlastStarted = false;
 };

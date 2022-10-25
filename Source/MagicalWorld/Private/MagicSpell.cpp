@@ -8,6 +8,7 @@
 #include "Particles/ParticleSystem.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "EnemyActor.h"
+#include "EnemyCharacter.h"
 #include "../MagicalWorldCharacter.h"
 #include "GameplayTagContainer.h"
 
@@ -66,7 +67,7 @@ void AMagicSpell::Tick(float DeltaTime)
 		{
 			AActor* Target = UGameplayStatics::GetActorOfClass(GetWorld(), HomingTarget);
 			ProjectileMovementComponent->bIsHomingProjectile = true;
-			ProjectileMovementComponent->HomingAccelerationMagnitude = ProjectileMovementComponent->MaxSpeed * 2;
+			ProjectileMovementComponent->HomingAccelerationMagnitude = ProjectileMovementComponent->MaxSpeed * 1.5;
 			if (Target)
 			{
 				ProjectileMovementComponent->HomingTargetComponent = Target->GetRootComponent();
@@ -87,7 +88,7 @@ void AMagicSpell::Tick(float DeltaTime)
 			
 		}
 		Initialized = false;
-		CollisionComponent->OnComponentBeginOverlap.AddDynamic(this, &AMagicSpell::OnEnemyCollision);
+		CollisionComponent->OnComponentBeginOverlap.AddDynamic(this, &AMagicSpell::OnCollisionOfSpell);
 	}
 	
 	TArray<AActor*> Enemies;
@@ -96,34 +97,46 @@ void AMagicSpell::Tick(float DeltaTime)
 	case Normal:
 		if (FVector::Dist(PlayerCharacter->GetActorLocation(), this->GetActorLocation()) > Rangee)
 		{
-			CollisionComponent->OnComponentBeginOverlap.RemoveDynamic(this, &AMagicSpell::OnEnemyCollision);
+			CollisionComponent->OnComponentBeginOverlap.RemoveDynamic(this, &AMagicSpell::OnCollisionOfSpell);
 			this->K2_DestroyActor();
 		}
 		break;
 	case Homing:
-		break;
-	case AOE:
-		AOETimer -= GetWorld()->DeltaTimeSeconds;
-		
-		UGameplayStatics::GetAllActorsOfClass(GetWorld(), AEnemyActor::StaticClass(), Enemies);
-		if (Enemies.Num() != 0 && !OnceAOE)
+		if (OwnerOfSpell == Enemy)
 		{
-			for (int i = 0; i < Enemies.Num(); i++)
+			HomingTimer -= GetWorld()->DeltaTimeSeconds;
+			if (HomingTimer <= 0.0f)
 			{
-				if (FVector::Dist(Enemies[i]->GetActorLocation(), PlayerCharacter->GetActorLocation()) < AOERangee)
-				{
-					if (Cast<AEnemyActor>(Enemies[i]))
-					{
-						Cast<AEnemyActor>(Enemies[i])->DealDamage(Damagee);
-					}
-				}
-				OnceAOE = true;
+				CollisionComponent->OnComponentBeginOverlap.RemoveDynamic(this, &AMagicSpell::OnCollisionOfSpell);
+				this->K2_DestroyActor();
 			}
 		}
-		if (AOETimer <= 0.0f)
+		break;
+	case AOE:
+		if (OwnerOfSpell == Player)
 		{
-			CollisionComponent->OnComponentBeginOverlap.RemoveDynamic(this, &AMagicSpell::OnEnemyCollision);
-			this->K2_DestroyActor();
+			AOETimer -= GetWorld()->DeltaTimeSeconds;
+
+			UGameplayStatics::GetAllActorsOfClass(GetWorld(), ABaseEnemyCharacter::StaticClass(), Enemies);
+			if (Enemies.Num() != 0 && !OnceAOE)
+			{
+				for (int i = 0; i < Enemies.Num(); i++)
+				{
+					if (FVector::Dist(Enemies[i]->GetActorLocation(), PlayerCharacter->GetActorLocation()) < AOERangee)
+					{
+						if (Cast<ABaseEnemyCharacter>(Enemies[i]))
+						{
+							Cast<ABaseEnemyCharacter>(Enemies[i])->DealDamage(Damagee);
+						}
+					}
+					OnceAOE = true;
+				}
+			}
+			if (AOETimer <= 0.0f)
+			{
+				CollisionComponent->OnComponentBeginOverlap.RemoveDynamic(this, &AMagicSpell::OnCollisionOfSpell);
+				this->K2_DestroyActor();
+			}
 		}
 		break;
 	default:
@@ -154,18 +167,25 @@ void AMagicSpell::InitializeMagicSpell()
 }
 
 
-void AMagicSpell::OnEnemyCollision(UPrimitiveComponent* OverlappedComponent,
+void AMagicSpell::OnCollisionOfSpell(UPrimitiveComponent* OverlappedComponent,
 	AActor* OtherActor,
 	UPrimitiveComponent* OtherComp,
 	int32 OtherBodyIndex,
 	bool bFromSweep,
 	const FHitResult& SweepResult)
 {
-	if (Cast<AEnemyActor>(OtherActor))
+	if (OwnerOfSpell == Player && Cast<ABaseEnemyCharacter>(OtherActor))
 	{
-		CollisionComponent->OnComponentBeginOverlap.RemoveDynamic(this, &AMagicSpell::OnEnemyCollision);
+		CollisionComponent->OnComponentBeginOverlap.RemoveDynamic(this, &AMagicSpell::OnCollisionOfSpell);
 		this->K2_DestroyActor();
-		Cast<AEnemyActor>(OtherActor)->DealDamage(Damagee);
+		Cast<ABaseEnemyCharacter>(OtherActor)->DealDamage(Damagee);
+	}
+
+	if (OwnerOfSpell == Enemy && Cast<AMagicalWorldCharacter>(OtherActor))
+	{
+		CollisionComponent->OnComponentBeginOverlap.RemoveDynamic(this, &AMagicSpell::OnCollisionOfSpell);
+		this->K2_DestroyActor();
+		Cast<AMagicalWorldCharacter>(OtherActor)->DealDamage(Damagee);
 	}
 }
 

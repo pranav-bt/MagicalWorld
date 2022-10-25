@@ -112,6 +112,12 @@ void AMagicalWorldCharacter::Spell3Equip()
 	MagicSystemComponent->ChangeActiveSpell(3);
 }
 
+void AMagicalWorldCharacter::DealDamage(int32 Damage)
+{
+	Health -= Damage;
+	GameHUD->Sethealth(Health);
+}
+
 void AMagicalWorldCharacter::TouchStarted(ETouchIndex::Type FingerIndex, FVector Location)
 {
 	Jump();

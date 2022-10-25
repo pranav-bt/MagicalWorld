@@ -1,40 +1,40 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "EnemyCharacter.h"
+#include "SphereEnemyCharacter.h"
 #include "Components/WidgetComponent.h"
 #include "MagicSystemComponent.h"
 #include "Kismet/GameplayStatics.h"
-#include "CubeAIController.h"
+#include "SphereAIController.h"
 #include "../MagicalWorldCharacter.h"
 #include "Components/TextRenderComponent.h"
 
 // Sets default values
-AEnemyCharacter::AEnemyCharacter()
+ASphereEnemyCharacter::ASphereEnemyCharacter()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	EnemyWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("Widget"));
 	HealthText = CreateDefaultSubobject<UTextRenderComponent>(TEXT("HealthText"));
 	HealthText->SetupAttachment(EnemyWidget);
-	PatrolPoints.Init(CreateDefaultSubobject<AActor>(TEXT("Actor")) , 3);
 }
 
 // Called when the game starts or when spawned
-void AEnemyCharacter::BeginPlay()
+void ASphereEnemyCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	AIController = Cast<ACubeAIController>(Controller);
-	AIController->CubeCharacter = this;
+	AIController = Cast<ASphereAIController>(Controller);
+	AIController->SphereCharacter = this;
 	AIController->CurrentState = AIController->Idle;
-	AIController->NextState = AIController->Patrol;
+	AIController->NextState = AIController->Idle;
 }
 
 // Called every frame
-void AEnemyCharacter::Tick(float DeltaTime)
+void ASphereEnemyCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	
 	EnemyWidget->SetWorldLocation(FVector(GetActorLocation().X, GetActorLocation().Y + 40, GetActorLocation().Z + 140));
 	EnemyWidget->SetWorldRotation(FRotator(GetActorRotation()));
 
@@ -55,13 +55,13 @@ void AEnemyCharacter::Tick(float DeltaTime)
 }
 
 // Called to bind functionality to input
-void AEnemyCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+void ASphereEnemyCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
 }
 
-void AEnemyCharacter::DealDamage(int32 Damage)
+void ASphereEnemyCharacter::DealDamage(int32 Damage)
 {
 	Health -= Damage;
 	HealthText->SetText(FText::FromString(FString::FromInt(Health)));
@@ -77,22 +77,29 @@ void AEnemyCharacter::DealDamage(int32 Damage)
 	}
 }
 
-void AEnemyCharacter::ChangeStateConditions()
+void ASphereEnemyCharacter::ChangeStateConditions()
 {
-	if (Health < HealthToTeleport && Health > 5.0f)
+	if (!bBlastStarted)
 	{
-		AIController->NextState = AIController->Teleport;
-		HealthToTeleport = HealthToTeleport - HealthToTeleport / 2;
-		return;
-	}
-	auto dis = FVector::Dist(UGameplayStatics::GetActorOfClass(GetWorld(), AMagicalWorldCharacter::StaticClass())->GetActorLocation(), GetActorLocation());
-	//auto Distace = (UGameplayStatics::GetActorOfClass(GetWorld(), AMagicalWorldCharacter::StaticClass())->GetActorLocation() - GetActorLocation()).Dist();
-	if (dis < AttackRange)
-	{
-		AIController->NextState = AIController->Attack;
-		return;
-	}
+		auto dis = FVector::Dist(UGameplayStatics::GetActorOfClass(GetWorld(), AMagicalWorldCharacter::StaticClass())->GetActorLocation(), GetActorLocation());
+		if (Health < 30.0f && dis < 125.0f)
+		{
+			AIController->NextState = AIController->Blast;
+			bBlastStarted = true;
+			return;
+		}
 
-	AIController->NextState = AIController->Patrol;
+		if (dis < 200.0f)
+		{
+			AIController->NextState = AIController->Melee;
+			return;
+		}
+
+		if (dis < 1000.0f)
+		{
+			AIController->NextState = AIController->Rush;
+			return;
+		}
+	}
 }
 

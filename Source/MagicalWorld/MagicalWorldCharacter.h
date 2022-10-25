@@ -89,5 +89,9 @@ public:
 	void Spell2Equip();
 
 	void Spell3Equip();
+
+	void DealDamage(int32 Damage);
+
+	int32 Health = 100;
 };
 

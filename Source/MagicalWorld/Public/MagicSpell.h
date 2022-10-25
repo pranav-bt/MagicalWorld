@@ -24,6 +24,13 @@ enum SpellMode
 	AOE
 };
 
+UENUM()
+enum SpellOwner
+{
+	Enemy,
+	Player
+};
+
 UCLASS()
 class MAGICALWORLD_API AMagicSpell : public AActor
 {
@@ -69,6 +76,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<USpellData> SpellData;
 
+	UPROPERTY(EditAnywhere, category = "General")
+		TEnumAsByte<SpellOwner> OwnerOfSpell;
+
 	// The vfx or effect to be played when spell is cast. 
 	UPROPERTY(EditAnywhere, category = "General")
 		UParticleSystem* SpellEffectt;
@@ -101,7 +111,7 @@ public:
 	bool OnceAOE = false;
 
 	UFUNCTION()
-	void OnEnemyCollision(UPrimitiveComponent* OverlappedComponent,
+	void OnCollisionOfSpell(UPrimitiveComponent* OverlappedComponent,
 		AActor* OtherActor,
 		UPrimitiveComponent* OtherComp,
 		int32 OtherBodyIndex,
@@ -113,6 +123,8 @@ public:
 	USpellData* CurrentSpellData;
 
 	AMagicalWorldCharacter* PlayerCharacter;
+
+	float HomingTimer = 10.0f;
 
 };
 
