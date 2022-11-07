@@ -93,5 +93,10 @@ public:
 	void DealDamage(int32 Damage);
 
 	int32 Health = 100;
+
+	UPROPERTY(BlueprintReadWrite)
+	int32 MaxDungeonsToCreate = 6;
+
+	int32 CurrentDungeons = 0;
 };
 

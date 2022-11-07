@@ -51,6 +51,7 @@ AMagicalWorldCharacter::AMagicalWorldCharacter()
 	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
 
 	MagicSystemComponent = CreateDefaultSubobject<UMagicSystemComponent>(TEXT("MagicSystem"));
+	MaxDungeonsToCreate = FMath::RandRange(5, 9);
 		//FInputModeGameAndUI Mode;
 	//Mode.SetLockMouseToViewport(true);
 	//Mode.SetHideCursorDuringCapture(false);

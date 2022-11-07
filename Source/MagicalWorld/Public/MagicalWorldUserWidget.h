@@ -34,4 +34,7 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Attributes")
 	void SpellNotValid(int32 PowerIndex);
+
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, Category = "Dungeon")
+	void DungeonCompleted();
 };
