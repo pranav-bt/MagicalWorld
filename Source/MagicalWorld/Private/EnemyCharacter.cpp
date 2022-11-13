@@ -24,6 +24,10 @@ AEnemyCharacter::AEnemyCharacter()
 void AEnemyCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+	if (!Controller)
+	{
+		SpawnDefaultController();
+	}
 	AIController = Cast<ACubeAIController>(Controller);
 	AIController->CubeCharacter = this;
 	AIController->CurrentState = AIController->Idle;
@@ -72,6 +76,7 @@ void AEnemyCharacter::DealDamage(int32 Damage)
 			AMagicalWorldCharacter* player = Cast<AMagicalWorldCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
 			player->MagicSystemComponent->AudioComponent->SetSound(player->MagicSystemComponent->KillSFX);
 			player->MagicSystemComponent->AudioComponent->Play();
+			player->EnemiesKilled++;
 			this->K2_DestroyActor();
 		}
 	}

@@ -26,6 +26,8 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
+	void UpdateMana(int32 Manareceived);
+
 	//Only add magic spells with which the player should start the game. 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = MagicSystem)
 	TArray<TSubclassOf<class AMagicSpell>> MagicSpells;

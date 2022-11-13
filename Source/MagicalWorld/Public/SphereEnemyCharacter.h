@@ -60,7 +60,7 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void ChangeToAttackMaterial(float Duration);
 
-	float Cooldown = 3.0f;
+	float Cooldown = 1.5f;
 
 	bool bBlastStarted = false;
 };

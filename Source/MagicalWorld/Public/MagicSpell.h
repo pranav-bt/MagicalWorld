@@ -21,7 +21,8 @@ enum SpellMode
 {
 	Normal,
 	Homing,
-	AOE
+	AOE,
+	Custom
 };
 
 UENUM()

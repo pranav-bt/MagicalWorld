@@ -61,18 +61,30 @@ void ACubeAIController::BeginPatrol()
 
 void ACubeAIController::MoveToNextPoint()
 {
-	CurrentPointToPatrolTo = CubeCharacter->PatrolPoints[FMath::RandRange(0, CubeCharacter->PatrolPoints.Num() - 1)];
-	if (CurrentPointToPatrolTo)
+	if (CubeCharacter->PatrolPoints.Num() != 1)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Blue, "Moving");
-		MoveToActor(CurrentPointToPatrolTo);
+		CurrentPointToPatrolTo = CubeCharacter->PatrolPoints[FMath::RandRange(0, CubeCharacter->PatrolPoints.Num() - 1)];
+		if (CurrentPointToPatrolTo)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Blue, "Moving");
+			MoveToActor(CurrentPointToPatrolTo);
+		}
 	}
 }
 
 void ACubeAIController::BeginTeleport()
 {
-	auto PatrolActor = CubeCharacter->TeleportPoints[FMath::RandRange(0, CubeCharacter->PatrolPoints.Num() - 1)];
-	CubeCharacter->TeleportTo(PatrolActor->GetActorLocation(), PatrolActor->GetActorRotation());
+	if (CubeCharacter->PatrolPoints.Num() == 1 && CubeCharacter->PatrolPoints[0])
+	{
+		auto PatrolActor = CubeCharacter->PatrolPoints[0];
+		CubeCharacter->TeleportTo(PatrolActor->GetActorLocation(), PatrolActor->GetActorRotation());
+		return;
+	}
+	if (CubeCharacter->PatrolPoints.Num() > 1)
+	{
+		auto PatrolActor = CubeCharacter->TeleportPoints[FMath::RandRange(0, CubeCharacter->PatrolPoints.Num() - 1)];
+		CubeCharacter->TeleportTo(PatrolActor->GetActorLocation(), PatrolActor->GetActorRotation());
+	}
 }
 
 void ACubeAIController::BeginAttack()
@@ -94,13 +106,16 @@ void ACubeAIController::ShootSpell()
 
 void ACubeAIController::UpdatePatrol()
 {
-	if (FVector::Dist(CurrentPointToPatrolTo->GetActorLocation(), CubeCharacter->GetActorLocation()) < 100.0f)
+	if (CubeCharacter->PatrolPoints.Num() != 1)
 	{
-		CurrentPointToPatrolTo = CubeCharacter->PatrolPoints[FMath::RandRange(0, CubeCharacter->PatrolPoints.Num() - 1)];
-		if (CurrentPointToPatrolTo)
+		if (FVector::Dist(CurrentPointToPatrolTo->GetActorLocation(), CubeCharacter->GetActorLocation()) < 100.0f)
 		{
-			MoveToActor(CurrentPointToPatrolTo);
+			CurrentPointToPatrolTo = CubeCharacter->PatrolPoints[FMath::RandRange(0, CubeCharacter->PatrolPoints.Num() - 1)];
+			if (CurrentPointToPatrolTo)
+			{
+				MoveToActor(CurrentPointToPatrolTo);
 
+			}
 		}
 	}
 }

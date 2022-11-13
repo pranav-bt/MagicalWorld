@@ -23,8 +23,13 @@ ASphereEnemyCharacter::ASphereEnemyCharacter()
 void ASphereEnemyCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+	if (!Controller)
+	{
+		SpawnDefaultController();
+	}
 	AIController = Cast<ASphereAIController>(Controller);
 	AIController->SphereCharacter = this;
+	
 	AIController->CurrentState = AIController->Idle;
 	AIController->NextState = AIController->Idle;
 }
@@ -72,6 +77,7 @@ void ASphereEnemyCharacter::DealDamage(int32 Damage)
 			AMagicalWorldCharacter* player = Cast<AMagicalWorldCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
 			player->MagicSystemComponent->AudioComponent->SetSound(player->MagicSystemComponent->KillSFX);
 			player->MagicSystemComponent->AudioComponent->Play();
+			player->EnemiesKilled++;
 			this->K2_DestroyActor();
 		}
 	}

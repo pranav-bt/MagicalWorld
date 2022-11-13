@@ -76,7 +76,8 @@ public:
 	class UMagicSystemComponent* MagicSystemComponent;
 
 
-
+	UFUNCTION(BlueprintCallable)
+	void AddHealth(int32 Health);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = MagicSystem)
 	TArray<TSubclassOf<AMagicSpell>> MagicSpells;
@@ -98,5 +99,8 @@ public:
 	int32 MaxDungeonsToCreate = 6;
 
 	int32 CurrentDungeons = 0;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	int32 EnemiesKilled = 0;
 };
 

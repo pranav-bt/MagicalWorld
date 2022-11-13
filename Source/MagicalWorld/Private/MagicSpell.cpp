@@ -87,6 +87,11 @@ void AMagicSpell::Tick(float DeltaTime)
 		{
 			
 		}
+
+		if (Spawnedparticle && CurrentSpellMode == Custom)
+		{
+
+		}
 		Initialized = false;
 		CollisionComponent->OnComponentBeginOverlap.AddDynamic(this, &AMagicSpell::OnCollisionOfSpell);
 	}
@@ -139,6 +144,7 @@ void AMagicSpell::Tick(float DeltaTime)
 			}
 		}
 		break;
+	case Custom:
 	default:
 		break;
 	}
@@ -162,6 +168,10 @@ void AMagicSpell::InitializeMagicSpell()
 		if (TypeOfSpelll.MatchesTag(FGameplayTag::RequestGameplayTag(FName("Spell.AOE"))))
 		{
 			CurrentSpellMode = AOE;
+		}
+		if (TypeOfSpelll.MatchesTag(FGameplayTag::RequestGameplayTag(FName("Spell.Custom"))))
+		{
+			CurrentSpellMode = Custom;
 		}
 		Initialized = true;
 }

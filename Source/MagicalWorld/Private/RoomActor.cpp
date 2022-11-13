@@ -4,6 +4,9 @@
 #include "RoomActor.h"
 #include "../MagicalWorldCharacter.h"
 #include "Kismet/GameplayStatics.h"
+#include "SphereEnemyCharacter.h"
+#include "MagicSystemComponent.h"
+#include "EnemyCharacter.h"
 #include "Components/InstancedStaticMeshComponent.h"
 
 // Sets default values
@@ -20,6 +23,7 @@ ARoomActor::ARoomActor()
 }
 
 // Called when the game starts or when spawned
+#pragma optimize("", off)
 void ARoomActor::BeginPlay()
 {
 	Super::BeginPlay();
@@ -137,7 +141,57 @@ void ARoomActor::BeginPlay()
 		double y = FMath::RandRange(2, RoomFloorsY - 3) * TileSizeY;
 		GetWorld()->SpawnActor<AActor>(EndPoint, FTransform(FRotator(0, 0, 0), GetActorLocation() + FVector(x, y, 5)));
 	}
+
+	int NumberofEnenmiesSpawned = 0;
+	while (NumberofEnenmiesSpawned < MaxEnemiesToSpawnInARoom)
+	{
+		FMath::RandBool() ? SpawnCubeEnemy() : SpawnSphereEnemy();
+		NumberofEnenmiesSpawned++;
+	}
+
+	if (player->MagicSystemComponent->MagicSpells.Num() < 3)
+	{
+		if (FMath::RandBool())
+		{
+			double x = FMath::RandRange(2, RoomFloorsX - 3) * TileSizeX;
+			double y = FMath::RandRange(2, RoomFloorsY - 3) * TileSizeY;
+			GetWorld()->SpawnActor<AActor>(AcquireAbilityActor, FTransform(FRotator(0, 0, 0), GetActorLocation() + FVector(x, y, 100)));
+		}
+	}
+
+	if (player->MagicSystemComponent->Mana < 30)
+	{
+		double x = FMath::RandRange(2, RoomFloorsX - 3) * TileSizeX;
+		double y = FMath::RandRange(2, RoomFloorsY - 3) * TileSizeY;
+		GetWorld()->SpawnActor<AActor>(GiveManaActor, FTransform(FRotator(0, 0, 0), GetActorLocation() + FVector(x, y, 100)));
+	}
+	
 }
+void ARoomActor::SpawnCubeEnemy()
+{
+	double x = FMath::RandRange(2, RoomFloorsX - 3) * TileSizeX;
+	double y = FMath::RandRange(2, RoomFloorsY - 3) * TileSizeY;
+	AActor* PatrolPointActor1 = GetWorld()->SpawnActor<AActor>(PatrolPoint, FTransform(FRotator(0, 0, 0), GetActorLocation() + FVector(x, y, 100)));
+	x = FMath::RandRange(2, RoomFloorsX - 3) * TileSizeX;
+	y = FMath::RandRange(2, RoomFloorsY - 3) * TileSizeY;
+	AActor* PatrolPointActor2 = GetWorld()->SpawnActor<AActor>(PatrolPoint, FTransform(FRotator(0, 0, 0), GetActorLocation() + FVector(x, y, 100)));
+	x = FMath::RandRange(2, RoomFloorsX - 3) * TileSizeX;
+	y = FMath::RandRange(2, RoomFloorsY - 3) * TileSizeY;
+	AActor* Enemy = GetWorld()->SpawnActor<AActor>(EnemyToSpawnInTheRoom2, FTransform(FRotator(0, 0, 0), GetActorLocation() + FVector(x, y, 100)));
+	AEnemyCharacter* EnemySpawned = Cast<AEnemyCharacter>(Enemy);
+	if (PatrolPointActor1)
+		EnemySpawned->PatrolPoints[0] = PatrolPointActor1;
+	//if (PatrolPointActor2)
+	//	EnemySpawned->PatrolPoints[1] = PatrolPointActor2;
+}
+void ARoomActor::SpawnSphereEnemy()
+{
+	double x = FMath::RandRange(2, RoomFloorsX - 3) * TileSizeX;
+	double y = FMath::RandRange(2, RoomFloorsY - 3) * TileSizeY;
+	AActor* Enemy = GetWorld()->SpawnActor<AActor>(EnemyToSpawnInTheRoom, FTransform(FRotator(0, 0, 0), GetActorLocation() + FVector(x, y, 100)));
+	ASphereEnemyCharacter* EnemySpawned = Cast<ASphereEnemyCharacter>(Enemy);
+}
+#pragma optimize("", on)
 
 // Called every frame
 void ARoomActor::Tick(float DeltaTime)

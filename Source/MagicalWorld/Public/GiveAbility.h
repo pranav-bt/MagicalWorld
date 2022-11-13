@@ -32,6 +32,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		TSubclassOf<class AMagicSpell> MagicSpellToGive;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+		bool GiveMana = false;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+		int32 ManaToGive = 50;
+
 	UFUNCTION()
 		void OnCollision(UPrimitiveComponent* OverlappedComponent,
 			AActor* OtherActor,

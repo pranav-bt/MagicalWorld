@@ -35,8 +35,14 @@ void UMagicSystemComponent::BeginPlay()
 void UMagicSystemComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
+	
 	// ...
+}
+
+void UMagicSystemComponent::UpdateMana(int32 Manareceived)
+{
+	Mana += Manareceived;
+	PlayerCharacter->GameHUD->SetMana(Mana);
 }
 
 bool UMagicSystemComponent::HasEnoughMana()
